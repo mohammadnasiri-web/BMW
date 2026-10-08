@@ -141,6 +141,14 @@
         durationMins: 20,
         active: true,
       },
+      {
+        name: "Diamond cutting (rims)",
+        category: "diamond",
+        description: "Diamond-cut alloy rim refinishing",
+        price: 0,
+        durationMins: 120,
+        active: true,
+      },
     ].map((item, index) => ({
       ...item,
       id: "SV" + (now + index),

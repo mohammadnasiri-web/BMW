@@ -3,23 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Buy car and van tyres online from Sutton Car Care Centre. Filter by brand, size, season and price — fitted in Sutton Coldfield." />
-  <title>Tyre shop | Sutton Car Care Centre</title>
+  <meta name="description" content="Buy car and van tyres online from Autroxa. Filter by brand, size, season and price — fitted in Birmingham." />
+  <title>Tyre shop | Autroxa</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=23" />
+  <link rel="stylesheet" href="styles.css?v=25" />
 </head>
 <body class="page-shop">
   <a class="skip-link" href="#main">Skip to content</a>
 
   <header class="site-header is-scrolled" id="header">
     <div class="header-inner">
-      <a class="brand" href="index.html" aria-label="Sutton Car Care Centre home">
+      <a class="brand" href="index.html" aria-label="Autroxa home">
         <span class="brand-mark" aria-hidden="true"></span>
         <span class="brand-text">
-          <span class="brand-name">Sutton Car Care</span>
-          <span class="brand-sub">Centre</span>
+          <span class="brand-name">Autroxa</span>
+          <span class="brand-sub">Birmingham B6</span>
         </span>
       </a>
 
@@ -81,7 +81,7 @@
           <div>
             <p class="eyebrow gold">Tyre shop</p>
             <h1>Shop tyres &amp; wheels</h1>
-            <p class="shop-lead">Browse by brand, size and season — order online and we’ll fit them at Norris Way.</p>
+            <p class="shop-lead">Browse by brand, size and season — order online and we’ll fit them at Birmingham B6.</p>
           </div>
           <form class="shop-search" id="shop-search-form" role="search">
             <label class="sr-only" for="shop-search">Search tyres</label>
@@ -193,16 +193,25 @@
         <button type="button" class="shop-cart-close" data-cart-close aria-label="Close basket">×</button>
       </header>
       <div class="shop-cart-body" id="shop-cart-body"></div>
+      <div class="shop-recs shop-recs-cart" id="shop-cart-recs" hidden></div>
       <footer class="shop-cart-foot">
         <div class="shop-cart-total">
           <span>Subtotal</span>
           <strong id="shop-cart-total">£0</strong>
         </div>
-        <p class="shop-cart-note">Fitting available at our Sutton Coldfield workshop.</p>
+        <p class="shop-cart-note">Fitting available at our Birmingham workshop.</p>
         <button type="button" class="btn btn-gold btn-lg" id="shop-checkout-open" disabled>Proceed to order</button>
       </footer>
     </div>
   </aside>
+
+  <div class="modal" id="shop-detail-modal" hidden>
+    <div class="modal-backdrop" data-detail-close></div>
+    <div class="modal-panel shop-detail-panel" role="dialog" aria-modal="true" aria-labelledby="shop-detail-title">
+      <button type="button" class="modal-close" data-detail-close aria-label="Close">×</button>
+      <div id="shop-detail-content"></div>
+    </div>
+  </div>
 
   <div class="modal" id="shop-checkout-modal" hidden>
     <div class="modal-backdrop" data-checkout-close></div>
@@ -254,13 +263,13 @@
 
   <footer class="site-footer">
     <div class="container footer-bottom" style="border:0;padding-top:0">
-      <p>© <span id="year"></span> Sutton Car Care Centre</p>
+      <p>© <span id="year"></span> Autroxa</p>
       <p class="footer-note"><a href="index.html">Back to home</a> · <a href="tel:01213780001">0121 378 0001</a></p>
     </div>
   </footer>
 
   <script src="script.js?v=5"></script>
   <script src="auth.js?v=3"></script>
-  <script src="shop.js?v=1"></script>
+  <script src="shop.js?v=2"></script>
 </body>
 </html>

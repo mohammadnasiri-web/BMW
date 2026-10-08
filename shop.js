@@ -331,6 +331,191 @@
     return html;
   }
 
+  const RELATED_SERVICES = [
+    {
+      id: "svc-fit",
+      title: "Tyre fitting",
+      blurb: "Supply & fit any brand or size at Birmingham B6.",
+      href: "book-online.html#catalogue",
+      match: ["tyre", "fit", "all"],
+    },
+    {
+      id: "svc-balance",
+      title: "Wheel balancing",
+      blurb: "Dynamic balance to cut vibration after new tyres.",
+      href: "book-online.html#catalogue",
+      match: ["balance", "all"],
+    },
+    {
+      id: "svc-align",
+      title: "Steering / wheel alignment",
+      blurb: "Keeps new tyres wearing evenly after fitting.",
+      href: "book-online.html#catalogue",
+      match: ["align", "tracking", "all"],
+    },
+    {
+      id: "svc-diamond",
+      title: "Diamond cutting",
+      blurb: "Restore alloys with diamond-cut rim refinishing.",
+      href: "book-online.html#catalogue",
+      match: ["diamond", "all"],
+    },
+  ];
+
+  function similarityScore(base, candidate) {
+    if (!base || !candidate || base.id === candidate.id) return -1;
+    let score = 0;
+    if (base.size && base.size === candidate.size) score += 50;
+    else if (rimFromSize(base.size) && rimFromSize(base.size) === rimFromSize(candidate.size)) {
+      score += 15;
+    }
+    if (base.brand && base.brand === candidate.brand) score += 25;
+    if (base.model && base.model === candidate.model) score += 22;
+    else if (
+      base.model &&
+      candidate.model &&
+      (String(base.model).includes(String(candidate.model).split(" ")[0]) ||
+        String(candidate.model).includes(String(base.model).split(" ")[0]))
+    ) {
+      score += 10;
+    }
+    if (base.season && base.season === candidate.season) score += 12;
+    if (base.vehicle && base.vehicle === candidate.vehicle) score += 10;
+    if (base.loadIndex && base.loadIndex === candidate.loadIndex) score += 6;
+    if (base.speedRating && base.speedRating === candidate.speedRating) score += 4;
+    const priceDiff = Math.abs(Number(base.price || 0) - Number(candidate.price || 0));
+    if (priceDiff <= 15) score += 8;
+    else if (priceDiff <= 30) score += 4;
+    if (Number(candidate.stock) > 0) score += 3;
+    if (candidate.featured) score += 2;
+    return score;
+  }
+
+  function findSimilarProducts(bases, limit, excludeIds) {
+    const seeds = Array.isArray(bases) ? bases.filter(Boolean) : [bases].filter(Boolean);
+    const exclude = new Set((excludeIds || []).map(String));
+    seeds.forEach((s) => exclude.add(String(s.id)));
+
+    const ranked = products
+      .filter((p) => !exclude.has(String(p.id)))
+      .map((p) => {
+        let best = 0;
+        seeds.forEach((seed) => {
+          best = Math.max(best, similarityScore(seed, p));
+        });
+        if (!seeds.length) {
+          best = (p.featured ? 20 : 0) + (Number(p.rating) || 0) * 2 + (Number(p.stock) > 0 ? 5 : 0);
+        }
+        return { product: p, score: best };
+      })
+      .filter((row) => row.score > 0)
+      .sort((a, b) => b.score - a.score || (b.product.rating || 0) - (a.product.rating || 0));
+
+    return ranked.slice(0, limit || 4).map((row) => row.product);
+  }
+
+  function relatedServicesFor(bases, limit) {
+    const seeds = Array.isArray(bases) ? bases.filter(Boolean) : [bases].filter(Boolean);
+    const vehicles = new Set(seeds.map((s) => s.vehicle).filter(Boolean));
+    const seasons = new Set(seeds.map((s) => s.season).filter(Boolean));
+    const scored = RELATED_SERVICES.map((svc) => {
+      let score = svc.match.includes("all") ? 8 : 0;
+      if (svc.id === "svc-fit") score += 20;
+      if (svc.id === "svc-balance") score += 18;
+      if (svc.id === "svc-align") score += 16;
+      if (svc.id === "svc-diamond") score += 12;
+      if (!seeds.length && svc.match.includes("all")) score += 4;
+      return { svc, score };
+    })
+      .filter((row) => row.score > 0)
+      .sort((a, b) => b.score - a.score);
+    return scored.slice(0, limit || 3).map((row) => row.svc);
+  }
+
+  function reasonForSimilar(base, product) {
+    if (!base) return "Popular pick";
+    if (base.size && base.size === product.size) return "Same size " + product.size;
+    if (base.brand && base.brand === product.brand) return "Same brand · " + product.brand;
+    if (base.season && base.season === product.season) return seasonLabel(product.season) + " alternative";
+    if (base.vehicle && base.vehicle === product.vehicle) return vehicleLabel(product.vehicle) + " fitment";
+    if (rimFromSize(base.size) === rimFromSize(product.size)) return "Similar rim " + product.rim;
+    return "Customers also view";
+  }
+
+  function renderRecoProductCard(product, reason) {
+    const out = Number(product.stock) <= 0;
+    return (
+      '<article class="shop-reco-card" data-open-detail="' +
+      escapeHtml(product.id) +
+      '">' +
+      (reason ? '<p class="shop-reco-reason">' + escapeHtml(reason) + "</p>" : "") +
+      '<p class="shop-card-brand">' +
+      escapeHtml(product.brand) +
+      "</p>" +
+      "<h4>" +
+      escapeHtml(product.model) +
+      "</h4>" +
+      '<p class="shop-card-size">' +
+      escapeHtml(product.size) +
+      " · " +
+      escapeHtml(product.loadIndex || "") +
+      escapeHtml(product.speedRating || "") +
+      "</p>" +
+      '<div class="shop-reco-foot">' +
+      "<strong>" +
+      money(product.price) +
+      "</strong>" +
+      '<button type="button" class="btn btn-gold btn-sm" data-add="' +
+      escapeHtml(product.id) +
+      '"' +
+      (out ? " disabled" : "") +
+      ">" +
+      (out ? "Unavailable" : "Add") +
+      "</button>" +
+      "</div></article>"
+    );
+  }
+
+  function renderRecoServiceCard(svc) {
+    return (
+      '<a class="shop-reco-service" href="' +
+      escapeHtml(svc.href) +
+      '">' +
+      "<h4>" +
+      escapeHtml(svc.title) +
+      "</h4>" +
+      "<p>" +
+      escapeHtml(svc.blurb) +
+      "</p>" +
+      "<span>Book service →</span>" +
+      "</a>"
+    );
+  }
+
+  function renderRecommendationsBlock(opts) {
+    const title = opts.title || "Related products & services";
+    const productsHtml = (opts.products || [])
+      .map((p) => renderRecoProductCard(p, opts.reasonFn ? opts.reasonFn(p) : ""))
+      .join("");
+    const servicesHtml = (opts.services || []).map(renderRecoServiceCard).join("");
+    if (!productsHtml && !servicesHtml) return "";
+    return (
+      '<section class="shop-recs-block">' +
+      "<h3>" +
+      escapeHtml(title) +
+      "</h3>" +
+      (productsHtml
+        ? '<div class="shop-recs-row" data-reco-products>' + productsHtml + "</div>"
+        : "") +
+      (servicesHtml
+        ? '<p class="shop-recs-sub">Useful workshop services</p><div class="shop-recs-services">' +
+          servicesHtml +
+          "</div>"
+        : "") +
+      "</section>"
+    );
+  }
+
   function ensureCatalogue() {
     const existing = readTyres();
     const byBarcode = new Map(existing.map((t) => [String(t.barcode || ""), t]));
@@ -562,6 +747,10 @@
           '">' +
           escapeHtml(stockLabel(p.stock)) +
           "</span></div>" +
+          '<div class="shop-card-actions">' +
+          '<button type="button" class="btn btn-outline btn-sm" data-open-detail="' +
+          escapeHtml(p.id) +
+          '">Details</button>' +
           '<button type="button" class="btn btn-gold btn-sm" data-add="' +
           escapeHtml(p.id) +
           '"' +
@@ -569,6 +758,7 @@
           ">" +
           (out ? "Unavailable" : "Add to basket") +
           "</button>" +
+          "</div>" +
           "</div></div></article>"
         );
       })
@@ -664,6 +854,26 @@
     if (btn) btn.disabled = cart.length === 0;
   }
 
+  function renderCartRecommendations() {
+    const wrap = document.getElementById("shop-cart-recs");
+    if (!wrap) return;
+    const seeds = cart
+      .map((item) => products.find((p) => p.id === item.id))
+      .filter(Boolean);
+    const exclude = cart.map((item) => item.id);
+    const similar = findSimilarProducts(seeds, 3, exclude);
+    const services = relatedServicesFor(seeds.length ? seeds : null, 3);
+    const seed = seeds[0] || null;
+    const html = renderRecommendationsBlock({
+      title: seeds.length ? "Often bought with your basket" : "Popular tyres & services",
+      products: similar,
+      services,
+      reasonFn: (p) => reasonForSimilar(seed, p),
+    });
+    wrap.hidden = !html;
+    wrap.innerHTML = html;
+  }
+
   function renderCart() {
     const body = document.getElementById("shop-cart-body");
     const total = document.getElementById("shop-cart-total");
@@ -672,6 +882,7 @@
     if (!body) return;
     if (!cart.length) {
       body.innerHTML = '<p class="panel-empty">Your basket is empty. Add tyres from the shop.</p>';
+      renderCartRecommendations();
       return;
     }
     body.innerHTML = cart
@@ -702,6 +913,98 @@
         );
       })
       .join("");
+    renderCartRecommendations();
+  }
+
+  function openDetail(id) {
+    const product = products.find((p) => p.id === id);
+    const modal = document.getElementById("shop-detail-modal");
+    const content = document.getElementById("shop-detail-content");
+    if (!product || !modal || !content) return;
+    const out = Number(product.stock) <= 0;
+    const similar = findSimilarProducts(product, 4, [product.id]);
+    const services = relatedServicesFor(product, 3);
+    content.innerHTML =
+      '<div class="shop-detail-hero">' +
+      '<div class="shop-tyre-art shop-detail-art" data-brand="' +
+      escapeHtml(product.brand) +
+      '" aria-hidden="true"><span>' +
+      escapeHtml((product.brand || "?").slice(0, 1)) +
+      "</span></div>" +
+      "<div>" +
+      '<p class="eyebrow">Product details</p>' +
+      '<h2 id="shop-detail-title">' +
+      escapeHtml(product.brand + " " + product.model) +
+      "</h2>" +
+      '<p class="shop-card-size">' +
+      escapeHtml(product.size) +
+      " · " +
+      escapeHtml(product.loadIndex || "") +
+      escapeHtml(product.speedRating || "") +
+      "</p>" +
+      '<p class="shop-rating"><span class="shop-stars">' +
+      stars(product.rating) +
+      "</span> " +
+      escapeHtml(String(product.rating)) +
+      " (" +
+      escapeHtml(String(product.reviews)) +
+      " reviews)</p>" +
+      "</div></div>" +
+      '<dl class="shop-detail-facts">' +
+      "<div><dt>Brand</dt><dd>" +
+      escapeHtml(product.brand) +
+      "</dd></div>" +
+      "<div><dt>Model</dt><dd>" +
+      escapeHtml(product.model) +
+      "</dd></div>" +
+      "<div><dt>Size</dt><dd>" +
+      escapeHtml(product.size) +
+      "</dd></div>" +
+      "<div><dt>Season</dt><dd>" +
+      escapeHtml(seasonLabel(product.season)) +
+      "</dd></div>" +
+      "<div><dt>Vehicle</dt><dd>" +
+      escapeHtml(vehicleLabel(product.vehicle)) +
+      "</dd></div>" +
+      "<div><dt>Load / speed</dt><dd>" +
+      escapeHtml((product.loadIndex || "") + (product.speedRating || "")) +
+      "</dd></div>" +
+      "</dl>" +
+      '<p class="shop-detail-specs">' +
+      escapeHtml(product.specs || "Premium tyre available for fitting at our Birmingham workshop.") +
+      "</p>" +
+      '<div class="shop-detail-buy">' +
+      "<div><strong class=\"shop-price\">" +
+      money(product.price) +
+      '</strong><span class="shop-stock ' +
+      (out ? "is-out" : Number(product.stock) <= 4 ? "is-low" : "is-ok") +
+      '">' +
+      escapeHtml(stockLabel(product.stock)) +
+      "</span></div>" +
+      '<button type="button" class="btn btn-gold" data-add="' +
+      escapeHtml(product.id) +
+      '"' +
+      (out ? " disabled" : "") +
+      ">" +
+      (out ? "Unavailable" : "Add to basket") +
+      "</button>" +
+      "</div>" +
+      renderRecommendationsBlock({
+        title: "Similar tyres for you",
+        products: similar,
+        services,
+        reasonFn: (p) => reasonForSimilar(product, p),
+      });
+
+    modal.hidden = false;
+    document.body.classList.add("modal-open");
+  }
+
+  function closeDetail() {
+    const modal = document.getElementById("shop-detail-modal");
+    if (modal) modal.hidden = true;
+    const checkout = document.getElementById("shop-checkout-modal");
+    if (!checkout || checkout.hidden) document.body.classList.remove("modal-open");
   }
 
   function addToCart(id) {
@@ -723,6 +1026,7 @@
     }
     writeCart(cart);
     renderCart();
+    closeDetail();
     openCart(true);
   }
 
@@ -924,9 +1228,27 @@
     renderProducts();
   });
 
+  function handleShopActionClick(event) {
+    const addBtn = event.target.closest("[data-add]");
+    if (addBtn) {
+      event.preventDefault();
+      event.stopPropagation();
+      addToCart(addBtn.getAttribute("data-add"));
+      return true;
+    }
+    const detailBtn = event.target.closest("[data-open-detail]");
+    if (detailBtn) {
+      event.preventDefault();
+      openDetail(detailBtn.getAttribute("data-open-detail"));
+      return true;
+    }
+    return false;
+  }
+
   document.getElementById("shop-grid")?.addEventListener("click", (event) => {
-    const id = event.target.getAttribute("data-add");
-    if (id) addToCart(id);
+    if (handleShopActionClick(event)) return;
+    const card = event.target.closest(".shop-card[data-id]");
+    if (card) openDetail(card.getAttribute("data-id"));
   });
 
   document.getElementById("shop-cart-toggle")?.addEventListener("click", () => {
@@ -964,6 +1286,24 @@
       writeCart(cart);
       renderCart();
     }
+  });
+
+  document.getElementById("shop-cart-recs")?.addEventListener("click", (event) => {
+    handleShopActionClick(event);
+  });
+
+  document.getElementById("shop-detail-content")?.addEventListener("click", (event) => {
+    handleShopActionClick(event);
+  });
+
+  document.querySelectorAll("[data-detail-close]").forEach((el) => {
+    el.addEventListener("click", () => closeDetail());
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") return;
+    const detail = document.getElementById("shop-detail-modal");
+    if (detail && !detail.hidden) closeDetail();
   });
 
   document.getElementById("shop-checkout-open")?.addEventListener("click", () => {

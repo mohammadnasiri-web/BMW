@@ -199,7 +199,7 @@
 
     const samples = [
       {
-        service: "Car MOT test",
+        service: "Tyre sales & fitting",
         price: "£40",
         duration: "1 hr",
         date: addDays(2),
@@ -208,7 +208,7 @@
         createdAt: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(),
       },
       {
-        service: "MOT & full service (up to 2.0L)",
+        service: "Steering / wheel alignment",
         price: "£280",
         duration: "3 hr",
         date: addDays(0),
@@ -226,7 +226,7 @@
         createdAt: new Date(Date.now() - 1000 * 60 * 60 * 72).toISOString(),
       },
       {
-        service: "Air conditioning re-gas R134A",
+        service: "Wheel balancing",
         price: "£45",
         duration: "30 min",
         date: addDays(-20),

@@ -61,7 +61,7 @@
       JSON.stringify({
         email: employee.email,
         name: employee.name,
-        shop: employee.shop || "Sutton Car Care",
+        shop: employee.shop || "Autroxa",
         access: { ...DEFAULT_ACCESS, ...(employee.access || {}) },
         active: employee.active !== false,
         at: Date.now(),
@@ -219,12 +219,12 @@
         description: "Cold-weather grip for UK winters",
       },
       {
-        name: "Car MOT test voucher",
+        name: "Diamond cutting quote pack",
         category: "service",
         price: 40,
         stock: 50,
         sold: 0,
-        description: "Standard car MOT booking credit",
+        description: "Diamond-cut rim refinishing enquiry credit",
       },
       {
         name: "Brake pad set (front)",
@@ -367,7 +367,7 @@
         return;
       }
       const data = new FormData(registerForm);
-      const shop = String(data.get("shop") || "Sutton Car Care").trim();
+      const shop = String(data.get("shop") || "Autroxa").trim();
       const name = String(data.get("name") || "").trim();
       const email = String(data.get("email") || "").trim().toLowerCase();
       const password = String(data.get("password") || "");

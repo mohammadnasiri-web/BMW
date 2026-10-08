@@ -1,6 +1,6 @@
-# Sutton Car Care Centre — Website Redesign
+# Autroxa — Website Redesign
 
-Modern, responsive landing + book-online pages inspired by [suttoncoldfieldmot.co.uk](https://www.suttoncoldfieldmot.co.uk/), with a **blue + gold** brand palette.
+Autroxa — tyre sales, wheel balancing, alignment and diamond cutting in Birmingham B6. Dark red + black + silver brand palette.
 
 ## Pages
 
