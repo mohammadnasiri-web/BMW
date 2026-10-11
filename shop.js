@@ -333,6 +333,13 @@
 
   const RELATED_SERVICES = [
     {
+      id: "svc-diamond",
+      title: "Diamond cutting",
+      blurb: "Restore alloys with diamond-cut rim refinishing.",
+      href: "book-online.html#catalogue",
+      match: ["diamond", "all"],
+    },
+    {
       id: "svc-fit",
       title: "Tyre fitting",
       blurb: "Supply & fit any brand or size at Birmingham B6.",
@@ -352,13 +359,6 @@
       blurb: "Keeps new tyres wearing evenly after fitting.",
       href: "book-online.html#catalogue",
       match: ["align", "tracking", "all"],
-    },
-    {
-      id: "svc-diamond",
-      title: "Diamond cutting",
-      blurb: "Restore alloys with diamond-cut rim refinishing.",
-      href: "book-online.html#catalogue",
-      match: ["diamond", "all"],
     },
   ];
 
@@ -420,10 +420,10 @@
     const seasons = new Set(seeds.map((s) => s.season).filter(Boolean));
     const scored = RELATED_SERVICES.map((svc) => {
       let score = svc.match.includes("all") ? 8 : 0;
-      if (svc.id === "svc-fit") score += 20;
-      if (svc.id === "svc-balance") score += 18;
-      if (svc.id === "svc-align") score += 16;
-      if (svc.id === "svc-diamond") score += 12;
+      if (svc.id === "svc-diamond") score += 22;
+      if (svc.id === "svc-fit") score += 18;
+      if (svc.id === "svc-balance") score += 14;
+      if (svc.id === "svc-align") score += 12;
       if (!seeds.length && svc.match.includes("all")) score += 4;
       return { svc, score };
     })

@@ -89,23 +89,83 @@
     return session;
   }
 
+  function syncServicePrices(list) {
+    const byName = {
+      "Wheel balancing": { price: 5, priceOnRequest: false, isFree: false },
+      "Wheel alignment / tracking": { price: 40, priceOnRequest: false, isFree: false },
+      "Puncture repair": { price: 10, priceOnRequest: false, isFree: false },
+      "Tyre air / inflation": { price: 0, priceOnRequest: false, isFree: true },
+      "Diamond cutting (rims)": { price: 0, priceOnRequest: true, isFree: false },
+      "Tyre fitting / replacement": { price: 0, priceOnRequest: true, isFree: false },
+      "Tyre repair (vulcanising)": { price: 0, priceOnRequest: true, isFree: false },
+      "Valve & TPMS service": { price: 0, priceOnRequest: true, isFree: false },
+    };
+    let changed = false;
+    const next = list.map((service) => {
+      const patch = byName[service.name];
+      if (!patch) return service;
+      const merged = { ...service, ...patch };
+      if (
+        Number(service.price) !== Number(patch.price) ||
+        Boolean(service.priceOnRequest) !== Boolean(patch.priceOnRequest) ||
+        Boolean(service.isFree) !== Boolean(patch.isFree)
+      ) {
+        changed = true;
+        merged.updatedAt = new Date().toISOString();
+      }
+      return merged;
+    });
+    if (!list.some((s) => s.name === "Tyre air / inflation")) {
+      next.push({
+        id: "SV" + Date.now(),
+        name: "Tyre air / inflation",
+        category: "other",
+        description: "Pressure check and air top-up",
+        price: 0,
+        durationMins: 5,
+        active: true,
+        isFree: true,
+        jobsDone: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+      changed = true;
+    }
+    if (changed) writeServices(next);
+    return next;
+  }
+
   function seedServices() {
-    if (readServices().length) return;
+    const existing = readServices();
+    if (existing.length) {
+      syncServicePrices(existing);
+      return;
+    }
     const now = Date.now();
     const samples = [
       {
+        name: "Diamond cutting (rims)",
+        category: "diamond",
+        description: "Diamond-cut alloy rim refinishing — call for price",
+        price: 0,
+        durationMins: 120,
+        active: true,
+        priceOnRequest: true,
+      },
+      {
         name: "Tyre fitting / replacement",
         category: "fitting",
-        description: "Remove old tyre, fit new tyre and torque wheels",
-        price: 20,
+        description: "Remove old tyre, fit new tyre and torque wheels — call for price",
+        price: 0,
         durationMins: 25,
         active: true,
+        priceOnRequest: true,
       },
       {
         name: "Puncture repair",
         category: "puncture",
         description: "Inspect, plug/patch and reinflate where safe",
-        price: 18,
+        price: 10,
         durationMins: 30,
         active: true,
       },
@@ -113,7 +173,7 @@
         name: "Wheel balancing",
         category: "balance",
         description: "Dynamic balance per wheel with weights",
-        price: 12,
+        price: 5,
         durationMins: 15,
         active: true,
       },
@@ -121,33 +181,36 @@
         name: "Wheel alignment / tracking",
         category: "alignment",
         description: "Front tracking check and adjust to spec",
-        price: 45,
+        price: 40,
         durationMins: 45,
         active: true,
       },
       {
+        name: "Tyre air / inflation",
+        category: "other",
+        description: "Pressure check and air top-up",
+        price: 0,
+        durationMins: 5,
+        active: true,
+        isFree: true,
+      },
+      {
         name: "Tyre repair (vulcanising)",
         category: "repair",
-        description: "Aparat / vulcanising repair for suitable damage",
-        price: 25,
+        description: "Aparat / vulcanising repair — call for price",
+        price: 0,
         durationMins: 40,
         active: true,
+        priceOnRequest: true,
       },
       {
         name: "Valve & TPMS service",
         category: "other",
-        description: "Valve replacement or TPMS reset assistance",
-        price: 15,
+        description: "Valve replacement or TPMS reset — call for price",
+        price: 0,
         durationMins: 20,
         active: true,
-      },
-      {
-        name: "Diamond cutting (rims)",
-        category: "diamond",
-        description: "Diamond-cut alloy rim refinishing",
-        price: 0,
-        durationMins: 120,
-        active: true,
+        priceOnRequest: true,
       },
     ].map((item, index) => ({
       ...item,
@@ -279,7 +342,11 @@
         : "") +
       "</div>" +
       '<strong class="service-price">' +
-      money(service.price) +
+      (service.isFree
+        ? "Free"
+        : service.priceOnRequest || Number(service.price) <= 0
+          ? "Call for price"
+          : money(service.price)) +
       "</strong>" +
       "</div>" +
       '<div class="service-meta">' +

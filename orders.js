@@ -199,9 +199,9 @@
 
     const samples = [
       {
-        service: "Tyre sales & fitting",
-        price: "£40",
-        duration: "1 hr",
+        service: "Diamond cutting (rims)",
+        price: "Call for price",
+        duration: "By appointment",
         date: addDays(2),
         vehicle: "AB12 CDE — Ford Focus",
         status: "pending",
@@ -209,16 +209,16 @@
       },
       {
         service: "Steering / wheel alignment",
-        price: "£280",
-        duration: "3 hr",
+        price: "£40",
+        duration: "45 min",
         date: addDays(0),
         vehicle: "XY69 ZZZ — VW Golf",
         status: "in-progress",
         createdAt: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
       },
       {
-        service: "4-wheel tracking alignment",
-        price: "£85",
+        service: "Puncture repair",
+        price: "£10",
         duration: "30 min",
         date: addDays(-3),
         vehicle: "AB12 CDE",
@@ -227,8 +227,8 @@
       },
       {
         service: "Wheel balancing",
-        price: "£45",
-        duration: "30 min",
+        price: "£5 / wheel",
+        duration: "15 min",
         date: addDays(-20),
         vehicle: "AB12 CDE",
         status: "completed",

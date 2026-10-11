@@ -494,6 +494,8 @@ p {
   position: absolute;
   inset: 0;
   z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
 }
 
 .hero-media img {
@@ -501,8 +503,17 @@ p {
   height: 100%;
   object-fit: cover;
   object-position: center 45%;
-  transform: scale(1.03);
-  animation: hero-zoom 18s var(--ease) infinite alternate;
+  transform: translate3d(0, 0, 0) scale(1.12);
+  transform-origin: center center;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-media img {
+    transform: none;
+    will-change: auto;
+  }
 }
 
 .hero-scrim {
@@ -649,11 +660,6 @@ p {
   height: 4px;
   border-radius: 50%;
   background: var(--gold-500);
-}
-
-@keyframes hero-zoom {
-  from { transform: scale(1.04); }
-  to { transform: scale(1.1); }
 }
 
 /* ========== Trust strip ========== */

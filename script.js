@@ -22,6 +22,89 @@
   onScroll();
   window.addEventListener("scroll", onScroll, { passive: true });
 
+  /* Hero: mouse + scroll parallax (like fixed BG motion on reference site) */
+  (() => {
+    const hero = document.querySelector("[data-hero-parallax]");
+    const img = document.querySelector("[data-hero-parallax-img]");
+    if (!hero || !img) return;
+
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (reduceMotion.matches) return;
+
+    const isTouch =
+      window.matchMedia("(hover: none), (pointer: coarse)").matches;
+    const mouseMax = isTouch ? 0 : 22;
+    const scrollMax = 90;
+    const scale = 1.12;
+
+    let targetX = 0;
+    let targetY = 0;
+    let curX = 0;
+    let curY = 0;
+    let scrollOffset = 0;
+    let running = true;
+
+    const updateScroll = () => {
+      const rect = hero.getBoundingClientRect();
+      const view = Math.max(rect.height, 1);
+      const progress = Math.min(Math.max(-rect.top / view, 0), 1.25);
+      scrollOffset = progress * scrollMax;
+    };
+
+    const onMove = (event) => {
+      const rect = hero.getBoundingClientRect();
+      if (rect.height <= 0 || rect.width <= 0) return;
+      const nx = (event.clientX - rect.left) / rect.width - 0.5;
+      const ny = (event.clientY - rect.top) / rect.height - 0.5;
+      targetX = nx * mouseMax * -1.15;
+      targetY = ny * mouseMax * -0.85;
+    };
+
+    const onLeave = () => {
+      targetX = 0;
+      targetY = 0;
+    };
+
+    const tick = () => {
+      if (!running) return;
+      curX += (targetX - curX) * 0.075;
+      curY += (targetY - curY) * 0.075;
+      img.style.transform =
+        "translate3d(" +
+        curX.toFixed(2) +
+        "px, " +
+        (curY + scrollOffset).toFixed(2) +
+        "px, 0) scale(" +
+        scale +
+        ")";
+      requestAnimationFrame(tick);
+    };
+
+    updateScroll();
+    window.addEventListener(
+      "scroll",
+      () => {
+        updateScroll();
+      },
+      { passive: true }
+    );
+    window.addEventListener("resize", updateScroll, { passive: true });
+
+    if (!isTouch) {
+      hero.addEventListener("mousemove", onMove, { passive: true });
+      hero.addEventListener("mouseleave", onLeave);
+    }
+
+    reduceMotion.addEventListener?.("change", (event) => {
+      if (event.matches) {
+        running = false;
+        img.style.transform = "";
+      }
+    });
+
+    requestAnimationFrame(tick);
+  })();
+
   if (menuToggle && mobileNav) {
     menuToggle.addEventListener("click", () => {
       const open = menuToggle.getAttribute("aria-expanded") === "true";
