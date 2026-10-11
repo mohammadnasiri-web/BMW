@@ -847,16 +847,74 @@
     return cart.reduce((n, i) => n + (i.qty || 0) * (i.price || 0), 0);
   }
 
+  const isCartPage = document.body.classList.contains("page-cart");
+  const isShopPage = document.body.classList.contains("page-shop");
+
   function updateCartBadge() {
-    const el = document.getElementById("shop-cart-count");
-    if (el) el.textContent = String(cartCount());
+    const count = cartCount();
+    document.querySelectorAll("#shop-cart-count, .shop-cart-count").forEach((el) => {
+      el.textContent = String(count);
+    });
     const btn = document.getElementById("shop-checkout-open");
-    if (btn) btn.disabled = cart.length === 0;
+    if (btn && btn.tagName === "BUTTON" && btn.type === "submit") {
+      btn.disabled = cart.length === 0;
+    } else if (btn) {
+      btn.disabled = cart.length === 0;
+    }
+  }
+
+  function syncCartPageChrome() {
+    if (!isCartPage) return;
+    const empty = document.getElementById("cart-empty");
+    const layout = document.getElementById("cart-layout");
+    const success = document.getElementById("cart-success");
+    const label = document.getElementById("cart-count-label");
+    const tyreCount = document.getElementById("cart-tyre-count");
+    const sum = document.getElementById("shop-checkout-summary");
+    const showingSuccess = success && !success.hidden;
+
+    if (tyreCount) tyreCount.textContent = String(cartCount());
+    if (label) {
+      label.textContent = cart.length
+        ? cartCount() +
+          " tyre" +
+          (cartCount() === 1 ? "" : "s") +
+          " · " +
+          money(cartTotal()) +
+          " subtotal"
+        : "Review your tyres, then book fitting at Birmingham B6.";
+    }
+    if (sum && cart.length) {
+      sum.textContent =
+        cart.length +
+        " line" +
+        (cart.length === 1 ? "" : "s") +
+        " · " +
+        cartCount() +
+        " tyres · " +
+        money(cartTotal());
+    } else if (sum) {
+      sum.textContent = "";
+    }
+
+    if (showingSuccess) {
+      if (empty) empty.hidden = true;
+      if (layout) layout.hidden = true;
+      return;
+    }
+
+    if (empty) empty.hidden = cart.length > 0;
+    if (layout) layout.hidden = cart.length === 0;
   }
 
   function renderCartRecommendations() {
     const wrap = document.getElementById("shop-cart-recs");
     if (!wrap) return;
+    if (!cart.length) {
+      wrap.hidden = true;
+      wrap.innerHTML = "";
+      return;
+    }
     const seeds = cart
       .map((item) => products.find((p) => p.id === item.id))
       .filter(Boolean);
@@ -865,7 +923,7 @@
     const services = relatedServicesFor(seeds.length ? seeds : null, 3);
     const seed = seeds[0] || null;
     const html = renderRecommendationsBlock({
-      title: seeds.length ? "Often bought with your basket" : "Popular tyres & services",
+      title: "Often bought with your basket",
       products: similar,
       services,
       reasonFn: (p) => reasonForSimilar(seed, p),
@@ -879,37 +937,59 @@
     const total = document.getElementById("shop-cart-total");
     if (total) total.textContent = money(cartTotal());
     updateCartBadge();
+    syncCartPageChrome();
     if (!body) return;
+
     if (!cart.length) {
-      body.innerHTML = '<p class="panel-empty">Your basket is empty. Add tyres from the shop.</p>';
+      body.innerHTML = "";
       renderCartRecommendations();
       return;
     }
+
     body.innerHTML = cart
       .map((item) => {
+        const line = (item.qty || 0) * (item.price || 0);
+        const letter = escapeHtml((item.brand || "?").slice(0, 1));
         return (
-          '<article class="shop-cart-item">' +
-          "<div><strong>" +
+          '<article class="cart-line" data-id="' +
+          escapeHtml(item.id) +
+          '">' +
+          '<div class="cart-line-media" aria-hidden="true">' +
+          '<div class="shop-tyre-art cart-line-art" data-brand="' +
+          escapeHtml(item.brand || "") +
+          '"><span>' +
+          letter +
+          "</span></div></div>" +
+          '<div class="cart-line-main">' +
+          '<div class="cart-line-copy">' +
+          "<h3>" +
           escapeHtml(item.brand + " " + item.model) +
-          '</strong><p>' +
+          "</h3>" +
+          "<p>" +
           escapeHtml(item.size) +
           " · " +
           money(item.price) +
-          " each</p></div>" +
-          '<div class="shop-cart-qty">' +
+          " each</p>" +
+          "</div>" +
+          '<div class="cart-line-controls">' +
+          '<div class="cart-qty" role="group" aria-label="Quantity">' +
           '<button type="button" data-qty-dec="' +
           escapeHtml(item.id) +
-          '" aria-label="Decrease">−</button>' +
-          "<span>" +
+          '" aria-label="Decrease quantity">−</button>' +
+          '<span aria-live="polite">' +
           item.qty +
           "</span>" +
           '<button type="button" data-qty-inc="' +
           escapeHtml(item.id) +
-          '" aria-label="Increase">+</button>' +
-          '<button type="button" class="text-link" data-qty-remove="' +
+          '" aria-label="Increase quantity">+</button>' +
+          "</div>" +
+          '<strong class="cart-line-total">' +
+          money(line) +
+          "</strong>" +
+          '<button type="button" class="cart-line-remove" data-qty-remove="' +
           escapeHtml(item.id) +
           '">Remove</button>' +
-          "</div></article>"
+          "</div></div></article>"
         );
       })
       .join("");
@@ -1003,8 +1083,7 @@
   function closeDetail() {
     const modal = document.getElementById("shop-detail-modal");
     if (modal) modal.hidden = true;
-    const checkout = document.getElementById("shop-checkout-modal");
-    if (!checkout || checkout.hidden) document.body.classList.remove("modal-open");
+    document.body.classList.remove("modal-open");
   }
 
   function addToCart(id) {
@@ -1027,48 +1106,47 @@
     writeCart(cart);
     renderCart();
     closeDetail();
-    openCart(true);
   }
 
-  function openCart(open) {
-    const drawer = document.getElementById("shop-cart-drawer");
-    const toggle = document.getElementById("shop-cart-toggle");
-    if (!drawer) return;
-    drawer.hidden = !open;
-    document.body.classList.toggle("shop-cart-open", open);
-    if (toggle) toggle.setAttribute("aria-expanded", open ? "true" : "false");
-  }
-
-  function openCheckout(open) {
-    const modal = document.getElementById("shop-checkout-modal");
-    if (!modal) return;
-    modal.hidden = !open;
-    if (open) {
-      const session = window.SuttonAuth && window.SuttonAuth.getSession();
-      const form = document.getElementById("shop-checkout-form");
-      if (form && session) {
-        if (form.name) form.name.value = session.name || "";
-        if (form.email) form.email.value = session.email || "";
-        if (form.phone) form.phone.value = session.phone || "";
-      }
-      const date = form && form.querySelector('[name="date"]');
-      if (date && !date.value) {
+  function prepCheckoutForm() {
+    const form = document.getElementById("shop-checkout-form");
+    if (!form) return;
+    const session = window.SuttonAuth && window.SuttonAuth.getSession();
+    if (session) {
+      if (form.name && !form.name.value) form.name.value = session.name || "";
+      if (form.email && !form.email.value) form.email.value = session.email || "";
+      if (form.phone && !form.phone.value) form.phone.value = session.phone || "";
+    }
+    const date = form.querySelector('[name="date"]');
+    if (date) {
+      const today = new Date();
+      date.min = today.toISOString().slice(0, 10);
+      if (!date.value) {
         const d = new Date();
         d.setDate(d.getDate() + 1);
         date.value = d.toISOString().slice(0, 10);
-        date.min = new Date().toISOString().slice(0, 10);
       }
-      const sum = document.getElementById("shop-checkout-summary");
-      if (sum) {
-        sum.textContent =
-          cart.length +
-          " line" +
-          (cart.length === 1 ? "" : "s") +
-          " · " +
-          cartCount() +
-          " tyres · " +
-          money(cartTotal());
-      }
+    }
+  }
+
+  function showCartSuccess(order, fitment) {
+    const success = document.getElementById("cart-success");
+    const layout = document.getElementById("cart-layout");
+    const empty = document.getElementById("cart-empty");
+    const title = document.getElementById("cart-success-title");
+    const lead = document.getElementById("cart-success-lead");
+    if (title) title.textContent = "Order " + order.id + " placed.";
+    if (lead) {
+      lead.textContent =
+        "We’ll confirm your " +
+        (fitment === "fitted" ? "fitting" : "collection") +
+        " soon.";
+    }
+    if (layout) layout.hidden = true;
+    if (empty) empty.hidden = true;
+    if (success) {
+      success.hidden = false;
+      success.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   }
 
@@ -1120,7 +1198,6 @@
       items: cart.map((i) => ({ ...i })),
     });
 
-    // reduce stock
     const all = readTyres();
     cart.forEach((item) => {
       const index = all.findIndex((t) => t.id === item.id);
@@ -1137,29 +1214,32 @@
 
     cart = [];
     writeCart(cart);
-    renderCart();
-    renderProducts();
-    openCheckout(false);
-    openCart(false);
-
+    if (isShopPage) renderProducts();
+    form.reset();
     if (status) {
       status.textContent = "";
       status.className = "form-status";
     }
-    form.reset();
-    alert(
-      "Order " +
-        order.id +
-        " placed. We’ll confirm your " +
-        (fitment === "fitted" ? "fitting" : "collection") +
-        " soon."
-    );
+    renderCart();
+    if (isCartPage) showCartSuccess(order, fitment);
+    else {
+      alert(
+        "Order " +
+          order.id +
+          " placed. We’ll confirm your " +
+          (fitment === "fitted" ? "fitting" : "collection") +
+          " soon."
+      );
+    }
   }
 
   /* events */
-  buildFilterOptions();
-  renderProducts();
+  if (isShopPage) {
+    buildFilterOptions();
+    renderProducts();
+  }
   renderCart();
+  if (isCartPage) prepCheckoutForm();
 
   document.getElementById("shop-filters")?.addEventListener("change", () => {
     syncFiltersFromDom();
@@ -1251,21 +1331,13 @@
     if (card) openDetail(card.getAttribute("data-id"));
   });
 
-  document.getElementById("shop-cart-toggle")?.addEventListener("click", () => {
-    const drawer = document.getElementById("shop-cart-drawer");
-    openCart(!!drawer?.hidden);
-  });
-  document.getElementById("shop-cart-toggle-mobile")?.addEventListener("click", () => {
-    openCart(true);
-  });
-  document.querySelectorAll("[data-cart-close]").forEach((el) => {
-    el.addEventListener("click", () => openCart(false));
-  });
-
   document.getElementById("shop-cart-body")?.addEventListener("click", (event) => {
-    const inc = event.target.getAttribute("data-qty-inc");
-    const dec = event.target.getAttribute("data-qty-dec");
-    const rem = event.target.getAttribute("data-qty-remove");
+    const incBtn = event.target.closest("[data-qty-inc]");
+    const decBtn = event.target.closest("[data-qty-dec]");
+    const remBtn = event.target.closest("[data-qty-remove]");
+    const inc = incBtn && incBtn.getAttribute("data-qty-inc");
+    const dec = decBtn && decBtn.getAttribute("data-qty-dec");
+    const rem = remBtn && remBtn.getAttribute("data-qty-remove");
     if (inc) {
       const product = products.find((p) => p.id === inc);
       const item = cart.find((c) => c.id === inc);
@@ -1306,13 +1378,6 @@
     if (detail && !detail.hidden) closeDetail();
   });
 
-  document.getElementById("shop-checkout-open")?.addEventListener("click", () => {
-    if (!cart.length) return;
-    openCheckout(true);
-  });
-  document.querySelectorAll("[data-checkout-close]").forEach((el) => {
-    el.addEventListener("click", () => openCheckout(false));
-  });
   document.getElementById("shop-checkout-form")?.addEventListener("submit", (event) => {
     event.preventDefault();
     placeOrder(event.target);

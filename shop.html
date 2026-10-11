@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=29" />
+  <link rel="stylesheet" href="styles.css?v=30" />
 </head>
 <body class="page-shop">
   <a class="skip-link" href="#main">Skip to content</a>
@@ -34,7 +34,7 @@
       </nav>
 
       <div class="header-actions">
-        <button type="button" class="shop-cart-btn" id="shop-cart-toggle" aria-controls="shop-cart-drawer" aria-expanded="false">
+        <a class="shop-cart-btn" href="cart.html">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M7 7h14l-1.5 9h-12L5 4H2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
             <circle cx="9" cy="20" r="1.4" fill="currentColor"/>
@@ -42,7 +42,7 @@
           </svg>
           Basket
           <span class="shop-cart-count" id="shop-cart-count">0</span>
-        </button>
+        </a>
         <a class="auth-nav-link" href="login.html" data-auth-guest>Sign in</a>
         <div class="user-chip" data-auth-user hidden>
           <a href="orders.html" data-user-name>Account</a>
@@ -57,13 +57,14 @@
     <nav class="nav-mobile" id="mobile-nav" hidden>
       <a href="index.html">Home</a>
       <a href="shop.html" aria-current="page">Tyre shop</a>
+      <a href="cart.html">Basket</a>
       <a href="book-online.html">Book online</a>
       <a href="request-service.html">Request service</a>
       <a href="about.html">About</a>
       <a href="contact.html">Contact</a>
       <a href="orders.html" data-auth-user hidden>My orders</a>
       <a href="login.html" data-auth-guest>Sign in</a>
-      <button type="button" class="btn btn-gold" id="shop-cart-toggle-mobile">Open basket</button>
+      <a class="btn btn-gold" href="cart.html">View basket</a>
     </nav>
   </header>
 
@@ -185,79 +186,11 @@
     </section>
   </main>
 
-  <aside class="shop-cart-drawer" id="shop-cart-drawer" hidden aria-label="Shopping basket">
-    <div class="shop-cart-scrim" data-cart-close></div>
-    <div class="shop-cart-panel" role="dialog" aria-modal="true" aria-labelledby="shop-cart-title">
-      <header class="shop-cart-head">
-        <h2 id="shop-cart-title">Your basket</h2>
-        <button type="button" class="shop-cart-close" data-cart-close aria-label="Close basket">×</button>
-      </header>
-      <div class="shop-cart-body" id="shop-cart-body"></div>
-      <div class="shop-recs shop-recs-cart" id="shop-cart-recs" hidden></div>
-      <footer class="shop-cart-foot">
-        <div class="shop-cart-total">
-          <span>Subtotal</span>
-          <strong id="shop-cart-total">£0</strong>
-        </div>
-        <p class="shop-cart-note">Fitting available at our Birmingham workshop.</p>
-        <button type="button" class="btn btn-gold btn-lg" id="shop-checkout-open" disabled>Proceed to order</button>
-      </footer>
-    </div>
-  </aside>
-
   <div class="modal" id="shop-detail-modal" hidden>
     <div class="modal-backdrop" data-detail-close></div>
     <div class="modal-panel shop-detail-panel" role="dialog" aria-modal="true" aria-labelledby="shop-detail-title">
       <button type="button" class="modal-close" data-detail-close aria-label="Close">×</button>
       <div id="shop-detail-content"></div>
-    </div>
-  </div>
-
-  <div class="modal" id="shop-checkout-modal" hidden>
-    <div class="modal-backdrop" data-checkout-close></div>
-    <div class="modal-panel shop-checkout-panel" role="dialog" aria-modal="true" aria-labelledby="shop-checkout-title">
-      <button type="button" class="modal-close" data-checkout-close aria-label="Close">×</button>
-      <h2 id="shop-checkout-title">Complete your tyre order</h2>
-      <form id="shop-checkout-form" class="auth-form" novalidate>
-        <div class="form-row">
-          <label>
-            <span>Full name</span>
-            <input type="text" name="name" required autocomplete="name" />
-          </label>
-          <label>
-            <span>Phone</span>
-            <input type="tel" name="phone" required autocomplete="tel" />
-          </label>
-        </div>
-        <label>
-          <span>Email</span>
-          <input type="email" name="email" required autocomplete="email" />
-        </label>
-        <div class="form-row">
-          <label>
-            <span>Vehicle registration</span>
-            <input type="text" name="vehicle" required placeholder="AB12 CDE" />
-          </label>
-          <label>
-            <span>Preferred date</span>
-            <input type="date" name="date" required />
-          </label>
-        </div>
-        <label>
-          <span>Fitting</span>
-          <select name="fitment" required>
-            <option value="fitted">Supply &amp; fit at garage</option>
-            <option value="collection">Collect only (no fitting)</option>
-          </select>
-        </label>
-        <label>
-          <span>Notes (optional)</span>
-          <textarea name="notes" rows="2" placeholder="Any fitting notes…"></textarea>
-        </label>
-        <p class="shop-checkout-summary" id="shop-checkout-summary"></p>
-        <button class="btn btn-gold btn-lg" type="submit">Place order</button>
-        <p class="form-status" id="shop-checkout-status" role="status" aria-live="polite"></p>
-      </form>
     </div>
   </div>
 
@@ -268,8 +201,8 @@
     </div>
   </footer>
 
-  <script src="script.js?v=5"></script>
+  <script src="script.js?v=6"></script>
   <script src="auth.js?v=3"></script>
-  <script src="shop.js?v=3"></script>
+  <script src="shop.js?v=4"></script>
 </body>
 </html>
