@@ -849,6 +849,7 @@
 
   const isCartPage = document.body.classList.contains("page-cart");
   const isShopPage = document.body.classList.contains("page-shop");
+  let cartStep = 1;
 
   function updateCartBadge() {
     const count = cartCount();
@@ -856,10 +857,45 @@
       el.textContent = String(count);
     });
     const btn = document.getElementById("shop-checkout-open");
-    if (btn && btn.tagName === "BUTTON" && btn.type === "submit") {
-      btn.disabled = cart.length === 0;
-    } else if (btn) {
-      btn.disabled = cart.length === 0;
+    if (btn) btn.disabled = cart.length === 0;
+    const continueBtn = document.getElementById("cart-continue-checkout");
+    if (continueBtn) continueBtn.disabled = cart.length === 0;
+  }
+
+  function setCartStep(step, opts) {
+    if (!isCartPage) return;
+    const next = cart.length ? (step === 2 ? 2 : 1) : 1;
+    const changed = next !== cartStep;
+    cartStep = next;
+    document.body.setAttribute("data-cart-step", String(cartStep));
+
+    const itemsPanel = document.getElementById("cart-step-items");
+    const summaryPanel = document.getElementById("cart-step-summary");
+    const step1Btn = document.getElementById("cart-step-1-btn");
+    const step2Btn = document.getElementById("cart-step-2-btn");
+
+    if (itemsPanel) itemsPanel.hidden = cartStep !== 1;
+    if (summaryPanel) summaryPanel.hidden = cartStep !== 2;
+
+    if (step1Btn) {
+      step1Btn.classList.toggle("is-active", cartStep === 1);
+      step1Btn.classList.toggle("is-done", cartStep > 1);
+      if (cartStep === 1) step1Btn.setAttribute("aria-current", "step");
+      else step1Btn.removeAttribute("aria-current");
+    }
+    if (step2Btn) {
+      step2Btn.classList.toggle("is-active", cartStep === 2);
+      step2Btn.disabled = cart.length === 0;
+      if (cartStep === 2) step2Btn.setAttribute("aria-current", "step");
+      else step2Btn.removeAttribute("aria-current");
+    }
+
+    if (cartStep === 2) prepCheckoutForm();
+    if (changed && cartStep === 2 && (!opts || opts.scroll !== false)) {
+      document.getElementById("cart-step-summary")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
     }
   }
 
@@ -871,16 +907,19 @@
     const label = document.getElementById("cart-count-label");
     const tyreCount = document.getElementById("cart-tyre-count");
     const sum = document.getElementById("shop-checkout-summary");
+    const itemsSubtotal = document.getElementById("cart-items-subtotal");
     const showingSuccess = success && !success.hidden;
+    const totalText = money(cartTotal());
 
     if (tyreCount) tyreCount.textContent = String(cartCount());
+    if (itemsSubtotal) itemsSubtotal.textContent = totalText;
     if (label) {
       label.textContent = cart.length
         ? cartCount() +
           " tyre" +
           (cartCount() === 1 ? "" : "s") +
           " · " +
-          money(cartTotal()) +
+          totalText +
           " subtotal"
         : "Review your tyres, then book fitting at Birmingham B6.";
     }
@@ -892,7 +931,7 @@
         " · " +
         cartCount() +
         " tyres · " +
-        money(cartTotal());
+        totalText;
     } else if (sum) {
       sum.textContent = "";
     }
@@ -905,6 +944,9 @@
 
     if (empty) empty.hidden = cart.length > 0;
     if (layout) layout.hidden = cart.length === 0;
+
+    if (!cart.length) setCartStep(1, { scroll: false });
+    else setCartStep(cartStep, { scroll: false });
   }
 
   function renderCartRecommendations() {
@@ -1239,7 +1281,23 @@
     renderProducts();
   }
   renderCart();
-  if (isCartPage) prepCheckoutForm();
+  if (isCartPage) {
+    setCartStep(1);
+    document.getElementById("cart-continue-checkout")?.addEventListener("click", () => {
+      if (!cart.length) return;
+      setCartStep(2);
+    });
+    document.getElementById("cart-back-to-items")?.addEventListener("click", () => {
+      setCartStep(1);
+    });
+    document.querySelectorAll("[data-cart-goto]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const step = Number(btn.getAttribute("data-cart-goto") || "1");
+        if (step === 2 && !cart.length) return;
+        setCartStep(step);
+      });
+    });
+  }
 
   document.getElementById("shop-filters")?.addEventListener("change", () => {
     syncFiltersFromDom();

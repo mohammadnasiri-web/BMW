@@ -8,9 +8,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=30" />
+  <link rel="stylesheet" href="styles.css?v=36" />
 </head>
-<body class="page-cart">
+<body class="page-cart" data-cart-step="1">
   <a class="skip-link" href="#main">Skip to content</a>
 
   <header class="site-header is-scrolled" id="header">
@@ -103,18 +103,44 @@
         </div>
 
         <div class="cart-layout" id="cart-layout">
-          <div class="cart-primary">
+          <nav class="cart-steps" aria-label="Checkout steps">
+            <button type="button" class="cart-step is-active" data-cart-goto="1" id="cart-step-1-btn">
+              <span class="cart-step-num">1</span>
+              <span class="cart-step-label">Items</span>
+            </button>
+            <span class="cart-steps-line" aria-hidden="true"></span>
+            <button type="button" class="cart-step" data-cart-goto="2" id="cart-step-2-btn">
+              <span class="cart-step-num">2</span>
+              <span class="cart-step-label">Order summary</span>
+            </button>
+          </nav>
+
+          <div class="cart-step-panel" id="cart-step-items" data-cart-panel="1">
             <header class="cart-list-head">
               <h2>Items</h2>
               <a class="text-link" href="shop.html">Continue shopping</a>
             </header>
             <div class="cart-list" id="shop-cart-body" aria-live="polite"></div>
             <div class="shop-recs shop-recs-cart cart-recs" id="shop-cart-recs" hidden></div>
+
+            <div class="cart-step-bar">
+              <div class="cart-step-bar-total">
+                <span>Subtotal</span>
+                <strong id="cart-items-subtotal">£0</strong>
+              </div>
+              <button type="button" class="btn btn-gold btn-lg" id="cart-continue-checkout" disabled>
+                Continue to order summary
+              </button>
+            </div>
           </div>
 
-          <aside class="cart-aside" aria-label="Order summary">
-            <div class="cart-summary">
+          <div class="cart-step-panel" id="cart-step-summary" data-cart-panel="2" hidden>
+            <header class="cart-list-head">
               <h2>Order summary</h2>
+              <button type="button" class="text-link cart-back-link" id="cart-back-to-items">← Back to items</button>
+            </header>
+
+            <div class="cart-summary cart-summary-full">
               <dl class="cart-totals">
                 <div>
                   <dt>Tyres</dt>
@@ -169,7 +195,7 @@
                 <p class="form-status" id="shop-checkout-status" role="status" aria-live="polite"></p>
               </form>
             </div>
-          </aside>
+          </div>
         </div>
 
         <div class="cart-success" id="cart-success" hidden>
@@ -204,6 +230,6 @@
 
   <script src="script.js?v=6"></script>
   <script src="auth.js?v=3"></script>
-  <script src="shop.js?v=4"></script>
+  <script src="shop.js?v=5"></script>
 </body>
 </html>
