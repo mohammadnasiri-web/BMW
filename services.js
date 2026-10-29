@@ -8,6 +8,7 @@
     puncture: "Puncture repair",
     balance: "Balancing",
     alignment: "Wheel alignment",
+    welding: "Wheel welding",
     repair: "Tyre repair",
     other: "Other service",
   };
@@ -93,6 +94,7 @@
     const byName = {
       "Wheel balancing": { price: 5, priceOnRequest: false, isFree: false },
       "Wheel alignment / tracking": { price: 40, priceOnRequest: false, isFree: false },
+      "Wheel welding": { price: 50, priceOnRequest: false, isFree: false },
       "Puncture repair": { price: 10, priceOnRequest: false, isFree: false },
       "Tyre air / inflation": { price: 0, priceOnRequest: false, isFree: true },
       "Diamond cutting (rims)": { price: 0, priceOnRequest: true, isFree: false },
@@ -125,6 +127,21 @@
         durationMins: 5,
         active: true,
         isFree: true,
+        jobsDone: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+      changed = true;
+    }
+    if (!list.some((s) => s.name === "Wheel welding")) {
+      next.push({
+        id: "SV" + (Date.now() + 1),
+        name: "Wheel welding",
+        category: "welding",
+        description: "Alloy rim crack / buckle weld repair, per wheel",
+        price: 50,
+        durationMins: 60,
+        active: true,
         jobsDone: 0,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -183,6 +200,14 @@
         description: "Front tracking check and adjust to spec",
         price: 40,
         durationMins: 45,
+        active: true,
+      },
+      {
+        name: "Wheel welding",
+        category: "welding",
+        description: "Alloy rim crack / buckle weld repair, per wheel",
+        price: 50,
+        durationMins: 60,
         active: true,
       },
       {

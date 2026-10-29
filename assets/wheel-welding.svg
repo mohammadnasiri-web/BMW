@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <radialGradient id="glow" cx="214" cy="62" r="70" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFB347" stop-opacity="0.55"/>
+      <stop offset="45%" stop-color="#8B0000" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#8B0000" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="rim" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#E4E4E4"/>
+      <stop offset="100%" stop-color="#7A7A7A"/>
+    </linearGradient>
+  </defs>
+  <rect width="320" height="180" fill="#0A0A0A"/>
+  <rect width="320" height="180" fill="url(#glow)"/>
+
+  <!-- alloy wheel -->
+  <g transform="translate(150 96)">
+    <circle r="66" stroke="url(#rim)" stroke-width="8"/>
+    <circle r="56" stroke="#4A4A4A" stroke-width="2"/>
+    <g stroke="url(#rim)" stroke-width="7" stroke-linecap="round">
+      <path d="M0 -14V-52"/>
+      <path d="M13.3 -4.3L49.5 -16.1"/>
+      <path d="M8.2 11.3L30.6 42.1"/>
+      <path d="M-8.2 11.3L-30.6 42.1"/>
+      <path d="M-13.3 -4.3L-49.5 -16.1"/>
+    </g>
+    <circle r="14" fill="#1A1A1A" stroke="url(#rim)" stroke-width="3"/>
+    <g fill="#C0C0C0">
+      <circle cx="0" cy="-7" r="1.8"/>
+      <circle cx="6.7" cy="-2.2" r="1.8"/>
+      <circle cx="4.1" cy="5.7" r="1.8"/>
+      <circle cx="-4.1" cy="5.7" r="1.8"/>
+      <circle cx="-6.7" cy="-2.2" r="1.8"/>
+    </g>
+  </g>
+
+  <!-- crack on rim lip, part welded -->
+  <path d="M187 49l4 6-3 5 5 6" stroke="#0A0A0A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M196 38c4 3 8 7 11 11" stroke="#FFB347" stroke-width="5" stroke-linecap="round" opacity="0.9"/>
+  <path d="M196 38c4 3 8 7 11 11" stroke="#FFF2D6" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- TIG torch -->
+  <g transform="rotate(-38 236 40)">
+    <rect x="220" y="4" width="16" height="44" rx="4" fill="#2A2A2A" stroke="#C0C0C0" stroke-width="1.5"/>
+    <rect x="223" y="48" width="10" height="10" rx="2" fill="#8B0000"/>
+    <path d="M228 58v6" stroke="#E4E4E4" stroke-width="2" stroke-linecap="round"/>
+    <path d="M228 4V-30" stroke="#3A3A3A" stroke-width="6" stroke-linecap="round"/>
+  </g>
+
+  <!-- arc + sparks -->
+  <circle cx="207" cy="50" r="5" fill="#FFF8E6"/>
+  <circle cx="207" cy="50" r="10" fill="#FFB347" opacity="0.35"/>
+  <g stroke="#FFC46B" stroke-width="1.6" stroke-linecap="round">
+    <path d="M212 54l16 10"/>
+    <path d="M211 46l18-6"/>
+    <path d="M203 56l-8 14"/>
+    <path d="M214 51l22 2"/>
+    <path d="M209 58l6 16"/>
+    <path d="M201 45l-10-8"/>
+  </g>
+  <g fill="#FFD9A0">
+    <circle cx="240" cy="70" r="1.5"/>
+    <circle cx="246" cy="58" r="1.2"/>
+    <circle cx="224" cy="80" r="1.4"/>
+    <circle cx="190" cy="76" r="1.2"/>
+    <circle cx="236" cy="38" r="1.1"/>
+  </g>
+</svg>

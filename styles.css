@@ -985,7 +985,7 @@ p {
 }
 
 .brand-logo svg {
-  width: 64px;
+  width: 100px;
   height: 40px;
 }
 
@@ -1645,7 +1645,7 @@ p {
   }
 
   .offer-row {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     align-items: stretch;
   }
 
@@ -4570,6 +4570,10 @@ body.modal-open {
 }
 
 @media (min-width: 1200px) {
+  .offer-row {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
   .shop-grid {
     grid-template-columns: repeat(3, 1fr);
   }
